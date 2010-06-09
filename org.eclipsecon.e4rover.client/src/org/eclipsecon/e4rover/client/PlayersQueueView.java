@@ -18,7 +18,6 @@ import javax.inject.Provider;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.core.di.extensions.Preference;
 import org.eclipse.e4.core.services.statusreporter.StatusReporter;
@@ -45,7 +44,7 @@ public class PlayersQueueView extends Object {
 	@Inject Composite parent;
 
 	// This is being used to set the PLAYER_KEY preference.
-	// @Inject IEclipsePreferences preferences;
+	@Inject @Preference IEclipsePreferences preferences;
 
 	/*
 	 * ContestPlatform is a domain-specific interface that is registered as an
@@ -79,7 +78,6 @@ public class PlayersQueueView extends Object {
 		keyText = new Text(parent, SWT.SINGLE | SWT.BORDER);
 		keyText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				IEclipsePreferences preferences = new InstanceScope().getNode("org.eclipsecon.e4rover.client");
 				preferences.put("PLAYER_KEY", keyText.getText());
 			}
 		});
