@@ -13,10 +13,11 @@ package org.eclipsecon.e4rover.client;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.services.annotations.EventHandler;
-import org.eclipse.e4.core.services.annotations.PostConstruct;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.EventTopic;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -55,10 +56,10 @@ public class WebcamView {
 	}
 
 	/*
-	 * The @EventHandlet annotation means that an OSGi event admin listener will
+	 * The @EventTopic annotation means that an OSGi event admin listener will
 	 * be registered for us, and events of the given topic will cause this
-	 * method to be called. @EventHandler methods will be called on any thread -
-	 * use @UIEventHandler if the call should be on the UI thread. At this time,
+	 * method to be called. @EventTopic methods will be called on any thread -
+	 * use @UIEventTopic if the call should be on the UI thread. At this time,
 	 * we only support payload data that is passed in the OSGi Event object
 	 * under the key IEventBroker#DATA. See ContestPlatform.java for the event
 	 * producer side.
@@ -67,8 +68,8 @@ public class WebcamView {
 	 * non-UI event handler so that the expensive image manipulation happens off
 	 * the UI thread.
 	 */
-	@EventHandler(IArenaCamImage.TOPIC) void arenaCamViewUpdated(IArenaCamImage img) {
-		if (parent.isDisposed()) {
+	@Inject void arenaCamViewUpdated(@Optional @EventTopic(IArenaCamImage.TOPIC) IArenaCamImage img) {
+		if (parent == null || parent.isDisposed() || img == null) {
 			return;
 		}
 		Image newImage = new Image(parent.getDisplay(), new ByteArrayInputStream(img.getImage()));

@@ -12,10 +12,11 @@ package org.eclipsecon.e4rover.client;
 
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.services.annotations.PostConstruct;
-import org.eclipse.e4.core.services.annotations.UIEventHandler;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -39,8 +40,8 @@ public class TelemetryView {
 	}
 
 	/*
-	 * The @UIEventHandlet annotation means that an OSGi event admin listener
-	 * will be registered for us, and events of the given topic will cause this
+	 * The @UIEventTopic annotation means that an OSGi event admin listener will
+	 * be registered for us, and events of the given topic will cause this
 	 * method to be called. @UIEventHandler methods will be called on the UI
 	 * thread - if the thread is not important, use @EventHandler. At this time,
 	 * we only support payload data that is passed in the OSGi Event object
@@ -50,8 +51,8 @@ public class TelemetryView {
 	 * This method will update the text widget with up to date information about
 	 * the robot state.
 	 */
-	@UIEventHandler(IRobot.TOPIC) void queueUpdated(final IRobot robot) {
-		if (text != null && !text.isDisposed()) {
+	@Inject void queueUpdated(@Optional @UIEventTopic(IRobot.TOPIC) final IRobot robot) {
+		if (text != null && !text.isDisposed() && robot != null) {
 			text.setText(robot.toString());
 		}
 	};

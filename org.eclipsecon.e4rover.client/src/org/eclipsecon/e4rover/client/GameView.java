@@ -10,10 +10,11 @@
  ******************************************************************************/
 package org.eclipsecon.e4rover.client;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.eclipse.e4.core.services.annotations.PostConstruct;
-import org.eclipse.e4.core.services.annotations.UIEventHandler;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.services.IStylingEngine;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -83,8 +84,8 @@ public class GameView {
 	}
 
 	/*
-	 * The @UIEventHandlet annotation means that an OSGi event admin listener
-	 * will be registered for us, and events of the given topic will cause this
+	 * The @UIEventTopic annotation means that an OSGi event admin listener will
+	 * be registered for us, and events of the given topic will cause this
 	 * method to be called. @UIEventHandler methods will be called on the UI
 	 * thread - if the thread is not important, use @EventHandler. At this time,
 	 * we only support payload data that is passed in the OSGi Event object
@@ -93,8 +94,8 @@ public class GameView {
 	 * 
 	 * This method will update the SWT widgets with up to date information.
 	 */
-	@UIEventHandler(IGame.TOPIC) void gameUpdated(final IGame game) {
-		if (parent != null && !parent.isDisposed()) {
+	@Inject void gameUpdated(@Optional @UIEventTopic(IGame.TOPIC) final IGame game) {
+		if (parent != null && !parent.isDisposed() && game != null) {
 			timestampText.setText("" + game.getTimestamp());
 			String playerName = game.getPlayerName();
 			playerText.setText(playerName == null ? "(nobody)" : playerName);

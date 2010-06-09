@@ -12,6 +12,8 @@ package org.eclipsecon.e4rover.client;
 
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
@@ -19,9 +21,8 @@ import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.IPreferenceChangeListener;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.core.runtime.preferences.InstanceScope;
-import org.eclipse.e4.core.services.StatusReporter;
-import org.eclipse.e4.core.services.annotations.PostConstruct;
-import org.eclipse.e4.core.services.annotations.PreDestroy;
+import org.eclipse.e4.core.di.extensions.Preference;
+import org.eclipse.e4.core.services.statusreporter.StatusReporter;
 import org.eclipsecon.e4rover.core.ContestPlatform;
 
 /**
@@ -52,7 +53,7 @@ public class RequestControlHandler {
 	 * moment. For now we hook into the preferences framework; see the end of
 	 * this class for details.
 	 */
-	// FIXME: @Inject @Named("preference-PLAYER_KEY")
+	@Inject @Preference("PLAYER_KEY")
 	String playerKey;
 
 	/**

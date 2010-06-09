@@ -12,15 +12,17 @@ package org.eclipsecon.e4rover.client;
 
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Provider;
 
 import org.apache.commons.httpclient.HttpStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.e4.core.services.StatusReporter;
-import org.eclipse.e4.core.services.annotations.PostConstruct;
-import org.eclipse.e4.core.services.annotations.UIEventHandler;
+import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Preference;
+import org.eclipse.e4.core.services.statusreporter.StatusReporter;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.layout.GridLayoutFactory;
 import org.eclipse.swt.SWT;
@@ -43,7 +45,7 @@ public class PlayersQueueView extends Object {
 	@Inject Composite parent;
 
 	// This is being used to set the PLAYER_KEY preference.
-	@Inject IEclipsePreferences preferences;
+	// @Inject IEclipsePreferences preferences;
 
 	/*
 	 * ContestPlatform is a domain-specific interface that is registered as an
@@ -77,6 +79,7 @@ public class PlayersQueueView extends Object {
 		keyText = new Text(parent, SWT.SINGLE | SWT.BORDER);
 		keyText.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
+				IEclipsePreferences preferences = new InstanceScope().getNode("org.eclipsecon.e4rover.client");
 				preferences.put("PLAYER_KEY", keyText.getText());
 			}
 		});
@@ -129,7 +132,7 @@ public class PlayersQueueView extends Object {
 	 * API, we are planning to replace the generic @Named annotation below with
 	 * a more specific annotation @Preference("PLAYER_KEY") in the final API.]
 	 */
-	@Inject void setPlayerKey(@Named("preference-PLAYER_KEY") final String playerKey) {
+	@Inject void setPlayerKey(@Preference("PLAYER_KEY") final String playerKey) {
 		parent.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				if (!keyText.getText().equals(playerKey)) {
@@ -140,8 +143,8 @@ public class PlayersQueueView extends Object {
 	}
 
 	/*
-	 * The @UIEventHandlet annotation means that an OSGi event admin listener
-	 * will be registered for us, and events of the given topic will cause this
+	 * The @UIEventTopic annotation means that an OSGi event admin listener will
+	 * be registered for us, and events of the given topic will cause this
 	 * method to be called. @UIEventHandler methods will be called on the UI
 	 * thread - if the thread is not important, use @EventHandler. At this time,
 	 * we only support payload data that is passed in the OSGi Event object
@@ -151,8 +154,8 @@ public class PlayersQueueView extends Object {
 	 * This method will update the text widget with up to date information about
 	 * the player queue.
 	 */
-	@UIEventHandler(IPlayerQueue.TOPIC) void queueUpdated(final IPlayerQueue queue) {
-		if (parent != null && !parent.isDisposed()) {
+	@Inject void queueUpdated(@Optional @UIEventTopic(IPlayerQueue.TOPIC) final IPlayerQueue queue) {
+		if (parent != null && !parent.isDisposed() && queue != null) {
 			text.setText(queue.toString());
 		}
 	};

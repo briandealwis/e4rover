@@ -10,13 +10,14 @@
  ******************************************************************************/
 package org.eclipsecon.e4rover.client;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.inject.Provider;
 
-import org.eclipse.e4.core.services.StatusReporter;
-import org.eclipse.e4.core.services.annotations.PostConstruct;
-import org.eclipse.e4.core.services.annotations.UIEventHandler;
+import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.core.di.extensions.Preference;
+import org.eclipse.e4.core.services.statusreporter.StatusReporter;
+import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.services.IStylingEngine;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -67,7 +68,7 @@ public class ControlView {
 	 * API, we are planning to replace the generic @Named annotation below with
 	 * a more specific annotation @Preference("PLAYER_KEY") in the final API.]
 	 */
-	@Inject @Named("preference-PLAYER_KEY") String playerKey;
+	@Inject @Preference("PLAYER_KEY") String playerKey;
 
 	/*
 	 * Injecting a javax.inject.Provider instead of the status reporter itself
@@ -185,7 +186,7 @@ public class ControlView {
 	 * API, we are planning to replace the generic @Named annotation below with
 	 * a more specific annotation @Preference("PLAYER_KEY") in the final API.]
 	 */
-	@Inject void setPlayerKey(@Named("preference-PLAYER_KEY") final String playerKey) {
+	@Inject void setPlayerKey(@Preference("PLAYER_KEY") final String playerKey) {
 		try {
 			if (nickLabel != null) {
 				nickLabel.setText("not logged in");
@@ -206,8 +207,8 @@ public class ControlView {
 	}
 
 	/*
-	 * The @UIEventHandlet annotation means that an OSGi event admin listener
-	 * will be registered for us, and events of the given topic will cause this
+	 * The @UIEventTopic annotation means that an OSGi event admin listener will
+	 * be registered for us, and events of the given topic will cause this
 	 * method to be called. @UIEventHandler methods will be called on the UI
 	 * thread - if the thread is not important, use @EventHandler. At this time,
 	 * we only support payload data that is passed in the OSGi Event object
@@ -217,7 +218,10 @@ public class ControlView {
 	 * This method will enable or disable the control buttons so that the user
 	 * has visual feedback as to when it is their turn.
 	 */
-	@UIEventHandler(IGame.TOPIC) void gameUpdated(final IGame game) {
+	@Inject void gameUpdated(@Optional @UIEventTopic(IGame.TOPIC) final IGame game) {
+		if (innerComposite == null) {
+			return;
+		}
 		if (game != null && game.getCountdownSeconds() == 0 && game.getPlayerName() != null
 				&& game.getPlayerName().equals(playerNick)) {
 			setButtonsEnabled(true);
