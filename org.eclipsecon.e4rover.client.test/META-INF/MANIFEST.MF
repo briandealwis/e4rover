@@ -1,0 +1,10 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Test Server
+Bundle-SymbolicName: org.eclipsecon.e4rover.client.test
+Bundle-Version: 1.0.0.qualifier
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Require-Bundle: org.eclipsecon.e4rover.client;bundle-version="1.0.0",
+ org.eclipsecon.e4rover.common;bundle-version="1.0.0"
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/testserver.xml

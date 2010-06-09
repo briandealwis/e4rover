@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<component name="testserver">
+	<implementation class="org.eclipsecon.e4rover.core.TestServer"/>
+	<service>
+		<provide interface="org.eclipsecon.e4rover.IServer"/>
+	</service>
+</component>
