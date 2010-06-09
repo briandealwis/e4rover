@@ -10,9 +10,13 @@
  ******************************************************************************/
 package org.eclipsecon.e4rover.core;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URL;
 
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.commons.io.IOUtils;
 import org.eclipsecon.e4rover.IServer;
 import org.eclipsecon.e4rover.core.IArenaCamImage;
 import org.eclipsecon.e4rover.core.IGame;
@@ -30,13 +34,26 @@ import org.eclipsecon.e4rover.internal.core.ServerObject;
 public class TestServer implements IServer {
 
 	protected XmlSerializer xmlserializer = new XmlSerializer();
-
+	protected HttpClient httpClient = new HttpClient();
+	
 	public <T extends IGameObject> T getLatest(Class<T> desiredClass) throws IOException {
 		Object result = null;
 		if(desiredClass == IArenaCamImage.class) {
 			// HACK: just for testing
 			String uri = "http://www.collineduparlement-parliamenthill.gc.ca/text/newhillcam.jpg";
-			result = new ArenaCamImage((byte[])new URL(uri).getContent());
+			try {
+				final GetMethod get = new GetMethod(uri);
+				try {
+					httpClient.executeMethod(get);
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					IOUtils.copy(get.getResponseBodyAsStream(), baos);
+					result = new ArenaCamImage((byte[])baos.toByteArray());
+				} finally {
+					get.releaseConnection();
+				}
+			} catch(IOException e) {
+				result = null;
+			}
 		} else if(desiredClass == IRobot.class) {
 			result = xmlserializer.fromXML(generateRobot());
 		} else if(desiredClass == IPlayers.class) {
@@ -62,7 +79,7 @@ public class TestServer implements IServer {
 	}
 
 	private String generateGoal() {
-		return "<goal target='ADIRONDACK' instrument='MICROSCOPE'/>";
+		return "<goal target='ADIRONDACK' instrument='SPECTROMETER'/>";
 	}
 
 	private String generatePlayerQueue() {
@@ -80,11 +97,11 @@ public class TestServer implements IServer {
 		"<remainingSeconds>99</remainingSeconds> " +
 		"<lastGoal> " +
 		" <target>ADIRONDACK</target> " +
-		" <instrument>MICROSCOPE</instrument> " +
+		" <instrument>DRILL</instrument> " +
 		"</lastGoal> " +
 		"<nextGoal> " +
 		"  <target>MAZATZAL</target> " +
-		"  <instrument>BRUSH</instrument> " +
+		"  <instrument>SPECTROMETER</instrument> " +
 		"</nextGoal> " +
 		"<nextReward>42</nextReward> " +
 		"</game>";
